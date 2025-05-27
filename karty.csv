@@ -1,39 +1,39 @@
 ﻿LP,Typ karty,Nazwa,Ilość w talii,Efekt pozytywny,Efekt negatywny,Powiązana karta,Opis żartobliwy
 1,Postęp,Kilometr w Nogach,2,+1 PChSz,,,Selfie zajmuje więcej czasu niż cała wyprawa.
-2,Postęp,Skrót przez Kosówkę,2,"+3 PChSz, odrzuć 1 kartę","+3 PChSz, odrzuć 1 kartę",,"Wycinasz zakręt tak ostro, że kosówka krzyczy."
-3,Postęp,Idealne Światło,2,+1 PChSz (+2 z Selfie Stick),,,"Drzemka tak skuteczna, że budzi Cię echo."
-4,Postęp,Opowieść Turysty,2,+1 PChSz i dobierz 1 kartę,,,Źródełko! Nie trzeba już pić izotonika z przeceny.
-5,Postęp,Wiatr w Plecy,2,+2 PChSz,,,Burza? Idealny moment na rozważanie sensu życia.
-6,Postęp,Chwila Medytacji,2,"+1 PChSz, wymień 1 kartę",,,Złamany paznokieć? KONIEC ŚWIATA!
-7,Postęp,Pusta Ścieżka,2,+2 PChSz,,,"Powerbank? Tak, ale tylko raz... potem wybuch."
-8,Postęp,Ciepła Herbata w Schronisku,2,"+1 PChSz, usuń 1 drobne Utrudnienie",,,Wiatr popycha Cię jak babcia do dokładki.
+2,Postęp,Skrót przez Kosówkę,2,+1 PChSz,,,"Wycinasz zakręt tak ostro, że kosówka krzyczy."
+3,Postęp,Idealne Światło,2,+1 PChSz,,,"Drzemka tak skuteczna, że budzi Cię echo."
+4,Postęp,Opowieść Turysty,2,+1 PChSz,,,Źródełko! Nie trzeba już pić izotonika z przeceny.
+5,Postęp,Wiatr w Plecy,2,+1 PChSz,,,Burza? Idealny moment na rozważanie sensu życia.
+6,Postęp,Chwila Medytacji,2,+1 PChSz,,,Złamany paznokieć? KONIEC ŚWIATA!
+7,Postęp,Pusta Ścieżka,2,+1 PChSz,,,"Powerbank? Tak, ale tylko raz... potem wybuch."
+8,Postęp,Ciepła Herbata w Schronisku,2,+1 PChSz,,,Wiatr popycha Cię jak babcia do dokładki.
 9,Postęp,Przeskoczyłem Kałużę,2,+1 PChSz,,,Ktoś zostawił czekoladę. Karma gór istnieje!
-10,Postęp,Pokonanie Stromej Ścianki,2,+2 PChSz (jeśli masz kijki +1),,,"Wycinasz zakręt tak ostro, że kosówka krzyczy."
-11,Postęp,Podziwianie Zachodu,2,"+2 PChSz, dobierz kartę",,,"Zachód tak piękny, że robisz 28 zdjęć identycznych."
-12,Postęp,Znalezienie Źródełka,2,"+1 PChSz, usuń 'Pragnienie'",,Pragnienie,"Zakład o schronisko kończy się tak, jak zawsze: śmiechem i stratą."
+10,Postęp,Pokonanie Stromej Ścianki,2,+1 PChSz,,,"Wycinasz zakręt tak ostro, że kosówka krzyczy."
+11,Postęp,Podziwianie Zachodu,2,+1 PChSz,,,"Zachód tak piękny, że robisz 28 zdjęć identycznych."
+12,Postęp,Znalezienie Źródełka,2,+1 PChSz,,Pragnienie,"Zakład o schronisko kończy się tak, jak zawsze: śmiechem i stratą."
 13,Postęp,Wyprzedzenie Grupki w Jeansach,2,+1 PChSz,,,"Wycinasz zakręt tak ostro, że kosówka krzyczy."
-14,Postęp,Power Nap,2,"+1 PChSz, dobierz 1 kartę",,,"Stajesz się alpinistą na 1,5 metra przewyższenia."
-15,Postęp,Ostatnia Prosta!,2,+3 PChSz,,,Janusz opowiada... i opowiada...
-16,JRW,Grupowe Zdjęcie!,1,Wszyscy +1 PChSz lub Ty +2 PChSz,,,"Adrenalina tak duża, że wspinasz się bez kijków."
-17,JRW,Zagadka Sfinksa,1,Zadaj pytanie – oboje +1 PChSz,,,Źródełko! Nie trzeba już pić izotonika z przeceny.
-18,JRW,Zróbmy Przerwę,1,Każdy może odrzucić kartę by +1 PChSz,,,Piątka od turysty działa lepiej niż baton energetyczny.
-19,JRW,Konkurs Szyszek,1,"Rzut K6: wygrywasz +1 PChSz, przegrany -1","Rzut K6: wygrywasz +1 PChSz, przegrany -1",,Wiatr kradnie kapelusz i godność.
-20,JRW,Wspólne Śpiewy,1,Usuń 1 Utrudnienie lub dobierz kartę,,,"Tyle już przeszedłeś, że nawet GPS się poddał."
-21,JRW,Zmiana Planów,1,,,,Wiatr kradnie kapelusz i godność.
-22,JRW,Znaleziona Czekolada,1,,,,Zaspałeś. Ale przynajmniej był sen o schronisku.
-23,JRW,Kto Zmywa Gary?,1,"Rzut K6 – najwyższy +2 PChSz, najniższy -1","Rzut K6 – najwyższy +2 PChSz, najniższy -1",,Przerwa regeneracyjna z widokiem na bacówkę.
-24,JRW,Chodźmy na Skróty,1,"+3 PChSz, w następnej turze odrzuć 2 karty","+3 PChSz, w następnej turze odrzuć 2 karty",,Herbata smakuje jak złoto. Tylko bardziej liściasto.
-25,JRW,Telefon od Szefa,1,,Odrzuć 1 kartę lub przekaż Utrudnienie,,"Śpiwór tak ciepły, że nie chce się wstać."
-26,JRW,Zrób Zakład o Schronisko,1,,,,"Zadajesz pytanie tak trudne, że Sfinks by się zawahał."
-27,JRW,Selfie z Kozicą,1,,,,Wiatr popycha Cię jak babcia do dokładki.
-28,JRW,Uderzenie Adrenaliny,1,,,,Wiatr popycha Cię jak babcia do dokładki.
-29,JRW,Wyścig po Widok,1,Kto pierwszy rzuci kostką – +1 PChSz,,,Kapelusz? Stylowy i praktyczny (głównie stylowy).
-30,JRW,Znaleziona Mapa,1,,,,Potykasz się o nic. Jak zwykle.
-31,JRW,Zimny Napój,1,"+1 PChSz, jeśli upał – +2 PChSz",,,Wiatr kradnie kapelusz i godność.
-32,JRW,"Zasady są po to, by je łamać",1,,,,Burza? Idealny moment na rozważanie sensu życia.
-33,JRW,Wspólna Narada,1,,,,"Selfie z kozicą? Nie pytaj, po prostu rób."
-34,JRW,Zróbmy Konkurs Zdjęć,1,Głosowanie – zwycięzca +2 PChSz,,,Worki na śmieci – karma i porządek w jednym.
-35,JRW,Przybij Piątkę!,1,Ty i inny gracz +1 PChSz,,,Rzut szyszką – bo szachy były za spokojne.
+14,Postęp,Power Nap,2,+1 PChSz,,,"Stajesz się alpinistą na 1,5 metra przewyższenia."
+15,Postęp,Ostatnia Prosta!,2,+1 PChSz,,,Janusz opowiada... i opowiada...
+16,JRW,Grupowe Zdjęcie!,1,Rzut K6,,,"Adrenalina tak duża, że wspinasz się bez kijków."
+17,JRW,Zagadka Sfinksa,1,Rzut K6,,,Źródełko! Nie trzeba już pić izotonika z przeceny.
+18,JRW,Zróbmy Przerwę,1,Rzut K6,,,Piątka od turysty działa lepiej niż baton energetyczny.
+19,JRW,Konkurs Szyszek,1,Rzut K6,,,Wiatr kradnie kapelusz i godność.
+20,JRW,Wspólne Śpiewy,1,Rzut K6,,,"Tyle już przeszedłeś, że nawet GPS się poddał."
+21,JRW,Zmiana Planów,1,Rzut K6,,,Wiatr kradnie kapelusz i godność.
+22,JRW,Znaleziona Czekolada,1,Rzut K6,,,Zaspałeś. Ale przynajmniej był sen o schronisku.
+23,JRW,Kto Zmywa Gary?,1,Rzut K6,,,Przerwa regeneracyjna z widokiem na bacówkę.
+24,JRW,Chodźmy na Skróty,1,Rzut K6,,,Herbata smakuje jak złoto. Tylko bardziej liściasto.
+25,JRW,Telefon od Szefa,1,Rzut K6,,,"Śpiwór tak ciepły, że nie chce się wstać."
+26,JRW,Zrób Zakład o Schronisko,1,Rzut K6,,,"Zadajesz pytanie tak trudne, że Sfinks by się zawahał."
+27,JRW,Selfie z Kozicą,1,Rzut K6,,,Wiatr popycha Cię jak babcia do dokładki.
+28,JRW,Uderzenie Adrenaliny,1,Rzut K6,,,Wiatr popycha Cię jak babcia do dokładki.
+29,JRW,Wyścig po Widok,1,Rzut K6,,,Kapelusz? Stylowy i praktyczny (głównie stylowy).
+30,JRW,Znaleziona Mapa,1,Rzut K6,,,Potykasz się o nic. Jak zwykle.
+31,JRW,Zimny Napój,1,Rzut K6,,,Wiatr kradnie kapelusz i godność.
+32,JRW,"Zasady są po to, by je łamać",1,Rzut K6,,,Burza? Idealny moment na rozważanie sensu życia.
+33,JRW,Wspólna Narada,1,Rzut K6,,,"Selfie z kozicą? Nie pytaj, po prostu rób."
+34,JRW,Zróbmy Konkurs Zdjęć,1,Rzut K6,,,Worki na śmieci – karma i porządek w jednym.
+35,JRW,Przybij Piątkę!,1,Rzut K6,,,Rzut szyszką – bo szachy były za spokojne.
 36,Utrudnienie,Potknięcie o Korzeń,2,,-1 PChSz,,"Adrenalina tak duża, że wspinasz się bez kijków."
 37,Utrudnienie,Influencerka,2,,-1 PChSz,,Latarka świeci jak nadzieja na szczycie.
 38,Utrudnienie,Janusz Turystyki,2,,-1 PChSz,,Potykasz się o nic. Jak zwykle.
@@ -45,37 +45,37 @@
 44,Utrudnienie,Pragnienie,2,,-1 PChSz,,Szczyt na wyciągnięcie kija trekkingowego.
 45,Utrudnienie,Błoto,2,,-1 PChSz,,Starszy pan opowiedział Ci całą historię Tatr. Trzy razy.
 46,Utrudnienie,Zgubiony Szlak,2,,-1 PChSz,,Źródełko! Nie trzeba już pić izotonika z przeceny.
-47,Utrudnienie,Nieodpowiednie Buty,2,-1 PChSz i +1 zmęczenie,-1 PChSz,,Wchodzisz jak buddyjski mnich w Crocsach.
+47,Utrudnienie,Nieodpowiednie Buty,2,,-1 PChSz,,Wchodzisz jak buddyjski mnich w Crocsach.
 48,Utrudnienie,Obluzowany Kamień,2,,-1 PChSz,,"Drzemka tak skuteczna, że budzi Cię echo."
 49,Utrudnienie,Wróciłeś po Kijek,2,,-1 PChSz,,Selfie zajmuje więcej czasu niż cała wyprawa.
 50,Utrudnienie,Dyskusja z Turystą,2,,-1 PChSz,,Rzut szyszką – bo szachy były za spokojne.
-51,Pogoda,Burza z Piorunami,1,,Wszyscy -1 PChSz. Metal = -2,,Rzut szyszką – bo szachy były za spokojne.
-52,Pogoda,Gęsta Mgła,1,,Nie można grać JRW. Postęp -1 PChSz,,"Zachód tak piękny, że robisz 28 zdjęć identycznych."
-53,Pogoda,Piękna Lampa!,1,,,,"Drzemka tak skuteczna, że budzi Cię echo."
-54,Pogoda,Halny,1,,,,"Scyzoryk – bo w górach nigdy nie wiesz, co się przyda."
-55,Pogoda,Upał,1,,Po Postępie odrzuć kartę,,Janusz opowiada... i opowiada...
-56,Pogoda,Oberwanie Chmury,1,,,,Potykasz się o nic. Jak zwykle.
+51,Pogoda,Burza z Piorunami,1,,-1 PChSz,,Rzut szyszką – bo szachy były za spokojne.
+52,Pogoda,Gęsta Mgła,1,,-1 PChSz,,"Zachód tak piękny, że robisz 28 zdjęć identycznych."
+53,Pogoda,Piękna Lampa!,1,+2 PChSz,,,"Drzemka tak skuteczna, że budzi Cię echo."
+54,Pogoda,Halny,1,,-1 PChSz,,"Scyzoryk – bo w górach nigdy nie wiesz, co się przyda."
+55,Pogoda,Upał,1,,-1 PChSz,,Janusz opowiada... i opowiada...
+56,Pogoda,Oberwanie Chmury,1,,-1 PChSz,,Potykasz się o nic. Jak zwykle.
 57,Pogoda,Tęcza po Burzy,1,+1 PChSz i dobierz kartę,,,Podskakujesz jak kozica z ADHD.
-58,Pogoda,Śnieżyca,1,,,,Burza? Idealny moment na rozważanie sensu życia.
-59,Pogoda,Mroźny Wiatr,1,,"Postęp -1 PChSz, bez czapki -1 PChSz",,Podskakujesz jak kozica z ADHD.
-60,Pogoda,Zmrok,1,,,,Rzut szyszką – bo szachy były za spokojne.
+58,Pogoda,Śnieżyca,1,,-1 PChSz,,Burza? Idealny moment na rozważanie sensu życia.
+59,Pogoda,Mroźny Wiatr,1,,-1 PChSz,,Podskakujesz jak kozica z ADHD.
+60,Pogoda,Zmrok,1,,-1 PChSz,,Rzut szyszką – bo szachy były za spokojne.
 61,Pogoda,Wiatr,1,,Nie możesz grać Utrudnień,,Sandały i skarpety – więcej stylu już się nie da.
-62,Pogoda,Nagły Deszcz,1,,Odrzuć 1 kartę lub -1 PChSz,,Selfie zajmuje więcej czasu niż cała wyprawa.
+62,Pogoda,Nagły Deszcz,1,,-1 PChSz,,Selfie zajmuje więcej czasu niż cała wyprawa.
 63,Pogoda,Grad,1,,Odrzuć losową kartę,,"Adrenalina tak duża, że wspinasz się bez kijków."
-64,Pogoda,Mglisty Poranek,1,,,,Zaspałeś. Ale przynajmniej był sen o schronisku.
-65,Pogoda,Cisza Przed Burzą,1,,,,Kapelusz? Stylowy i praktyczny (głównie stylowy).
-66,Ekwipunek,Kijki Trekkingowe,2,+1 PChSz po każdej karcie Postępu,,,Lampa! Robisz zdjęcia jak paparazzi świstaka.
-67,Ekwipunek,Termos z Herbatą,2,+1 PChSz i dobierz kartę lub usuń Utrudnienie,,,Źródełko! Nie trzeba już pić izotonika z przeceny.
-68,Ekwipunek,Czekolada,2,"Dziel się = oboje +1 PChSz, dobierz kartę",,,"Wycinasz zakręt tak ostro, że kosówka krzyczy."
-69,Ekwipunek,Raczki,2,,,,"Robicie zdjęcie tak dobre, że wchodzi na okładkę 'Pasterz Today'."
-70,Ekwipunek,Scyzoryk,2,,,,"Drzemka tak skuteczna, że budzi Cię echo."
-71,Ekwipunek,Latarka,2,,,Zmrok,"Zachód tak piękny, że robisz 28 zdjęć identycznych."
-72,Ekwipunek,Kapelusz,2,,,Upał,"Śpiwór tak ciepły, że nie chce się wstać."
-73,Ekwipunek,Mapa,2,,,Zgubienie Szlaku,Mapa z dziurą – niczym Twoja pamięć do szlaków.
-74,Ekwipunek,Buty trekkingowe,2,,,,"Robicie zdjęcie tak dobre, że wchodzi na okładkę 'Pasterz Today'."
-75,Ekwipunek,Selfie Stick,2,+1 PChSz do 'Zdjęcie' kart,,Zdjęcie,Janusz opowiada... i opowiada...
-76,Ekwipunek,Sandały i Skarpety,2,,,,Wspólne nucenie hitów lat 90. poprawia morale.
-77,Ekwipunek,Apteczka,2,,,,Apteczka? Plaster i dobre słowo.
-78,Ekwipunek,Worki na Śmieci,2,+1 PChSz na koniec gry,,,Grasz o wszystko. Czyli 2 PChSz i resztki godności.
-79,Ekwipunek,Śpiwór,2,,,Zimno,"Drzemka tak skuteczna, że budzi Cię echo."
-80,Ekwipunek,Powerbank,2,,"Dobierz 2 karty, ale rzut K6 – 1 = stracisz kartę",,Wyprzedzasz jeansy jak TGV na drodze polnej.
+64,Pogoda,Mglisty Poranek,1,+2 PChSz,,,Zaspałeś. Ale przynajmniej był sen o schronisku.
+65,Pogoda,Cisza Przed Burzą,1,+2 PChSz,,,Kapelusz? Stylowy i praktyczny (głównie stylowy).
+66,Ekwipunek,Kijki Trekkingowe,2,+1 PChSz,,,Lampa! Robisz zdjęcia jak paparazzi świstaka.
+67,Ekwipunek,Termos z Herbatą,2,+1 PChSz,,,Źródełko! Nie trzeba już pić izotonika z przeceny.
+68,Ekwipunek,Czekolada,2,+1 PChSz,,,"Wycinasz zakręt tak ostro, że kosówka krzyczy."
+69,Ekwipunek,Raczki,2,+1 PChSz,,,"Robicie zdjęcie tak dobre, że wchodzi na okładkę 'Pasterz Today'."
+70,Ekwipunek,Scyzoryk,2,+1 PChSz,,,"Drzemka tak skuteczna, że budzi Cię echo."
+71,Ekwipunek,Latarka,2,+1 PChSz,,Zmrok,"Zachód tak piękny, że robisz 28 zdjęć identycznych."
+72,Ekwipunek,Kapelusz,2,+1 PChSz,,Upał,"Śpiwór tak ciepły, że nie chce się wstać."
+73,Ekwipunek,Mapa,2,+1 PChSz,,Zgubienie Szlaku,Mapa z dziurą – niczym Twoja pamięć do szlaków.
+74,Ekwipunek,Buty trekkingowe,2,+1 PChSz,,,"Robicie zdjęcie tak dobre, że wchodzi na okładkę 'Pasterz Today'."
+75,Ekwipunek,Selfie Stick,2,+1 PChSz,,Zdjęcie,Janusz opowiada... i opowiada...
+76,Ekwipunek,Sandały i Skarpety,2,+1 PChSz,,,Wspólne nucenie hitów lat 90. poprawia morale.
+77,Ekwipunek,Apteczka,2,+1 PChSz,,,Apteczka? Plaster i dobre słowo.
+78,Ekwipunek,Worki na Śmieci,2,+1 PChSz,,,Grasz o wszystko. Czyli 2 PChSz i resztki godności.
+79,Ekwipunek,Śpiwór,2,+1 PChSz,,Zimno,"Drzemka tak skuteczna, że budzi Cię echo."
+80,Ekwipunek,Powerbank,2,+1 PChSz,,,Wyprzedzasz jeansy jak TGV na drodze polnej.
