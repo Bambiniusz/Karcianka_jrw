@@ -3,31 +3,36 @@
 <head>
   <meta charset="UTF-8" />
   <title>Symulator JRW Online – Zdarzenia + K6 + Utrudnienia</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
+    html { box-sizing: border-box; }
+    *, *:before, *:after { box-sizing: inherit; }
     body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f4fa; margin: 0; padding: 0; }
     header { background: #3862ad; color: #fff; padding: 18px 28px; }
     .container { max-width: 680px; margin: 32px auto; background: #fff; border-radius: 13px; box-shadow: 0 2px 18px #3862ad20; padding: 24px; }
     h2 { color: #3862ad; }
-    .flex { display: flex; gap: 12px; align-items: center; }
+    .flex { display: flex; gap: 12px; align-items: center; flex-wrap: wrap;}
     label { margin-right: 7px; }
-    .log { background: #f4f8fd; margin-top: 18px; padding: 10px; border-radius: 6px; min-height: 80px; font-size: 0.96em; color: #333; }
-    input[type=text], input[type=number], input[type=file] { font-size: 1em; border-radius: 5px; border: 1px solid #aaa; padding: 5px 9px; }
-    button { padding: 8px 16px; border-radius: 5px; background: #3862ad; color: #fff; border: none; cursor: pointer; font-size: 1em; margin-top: 12px; }
+    .log { background: #f4f8fd; margin-top: 18px; padding: 10px; border-radius: 6px; min-height: 80px; font-size: 0.96em; color: #333; word-break: break-word;}
+    input[type=text], input[type=number] { font-size: 1em; border-radius: 5px; border: 1px solid #aaa; padding: 5px 9px; }
+    button { padding: 13px 16px; border-radius: 7px; background: #3862ad; color: #fff; border: none; cursor: pointer; font-size: 1.1em; margin: 10px 4px 0 0; min-width: 70px;}
     button:active { background: #26477b;}
     #share-url { background: #e7f3ff; padding: 7px 12px; margin: 15px 0 5px 0; border-radius: 7px; word-break: break-all; color: #336;}
     #share-url strong { color: #3877c7; }
-    .hand { display: flex; flex-wrap: wrap; gap: 10px; min-height: 110px; margin: 12px 0;}
+    .hand { display: flex; flex-wrap: wrap; gap: 12px; min-height: 110px; margin: 12px 0;}
     .card {
-      border-radius: 10px; background: #f9fcff; border: 2px solid #c5d8ff; min-width: 160px; max-width: 185px;
-      box-shadow: 0 1px 4px #aaa2; padding: 12px 9px; font-size: 0.96em; position: relative;
+      border-radius: 10px; background: #f9fcff; border: 2px solid #c5d8ff; min-width: 135px; max-width: 185px;
+      box-shadow: 0 1px 4px #aaa2; padding: 10px 7px; font-size: 1.06em; position: relative; flex: 1 1 135px;
+      margin-bottom: 7px;
     }
     .card.utrudnienie { border-color: #ffb8b3; background: #fff6f6;}
     .card.postep { border-color: #b7e7a3; background: #f8fff5;}
     .card.pogoda { border-color: #9fe3d7; background: #f2fffd;}
     .card.jrw { border-color: #dac9fa; background: #f7f5fe;}
     .card small { color: #3862ad; font-size: 0.93em; display:block; margin-top: 4px;}
-    .hand .card button { margin: 6px 2px 0 0; font-size: 0.92em;}
-    .scorebar { margin-top:10px; background:#eaf1fa; border-radius:8px; padding: 9px 11px;}
+    .hand .card button { margin: 8px 0 0 0; font-size: 1em; width: 100%; }
+    .hand .card input[type=checkbox] { transform: scale(1.3); margin: 7px 5px 0 0; }
+    .scorebar { margin-top:10px; background:#eaf1fa; border-radius:8px; padding: 11px 11px; font-size:1.06em;}
     #event-box {
       background: #eafcf3; border: 2px solid #32ba92; color: #236b56;
       padding: 12px 15px; border-radius: 9px; margin-bottom: 12px; margin-top: 8px;
@@ -44,6 +49,18 @@
     #k6btn { margin-top: 15px; font-size: 1.4em; background: #3862ad;}
     #k6result { font-size:2.5em; margin-top:19px; }
     #targetModal-content button { margin: 6px 11px 0 11px;}
+    @media (max-width: 750px) {
+      .container { padding: 9px 2vw; border-radius: 0; box-shadow: none; margin:0;}
+      .scorebar, #event-box { font-size: 0.99em;}
+      .hand { gap: 6px;}
+      .card { min-width: 97vw; max-width: 99vw; font-size: 1.06em;}
+      .log { font-size: 0.93em;}
+      h2 { font-size: 1.1em;}
+      button { font-size: 1em; min-width: unset; padding: 11px 9px;}
+    }
+    @media (max-width: 440px) {
+      .card { min-width: 97vw; max-width: 99vw; font-size: 0.96em;}
+    }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.1/papaparse.min.js"></script>
   <!-- Firebase SDKs -->
@@ -70,11 +87,11 @@
 </head>
 <body>
   <header>
-    <h1>Symulator JRW – Tryb Online (DEMO)</h1>
+    <h1>Symulator JRW – Tryb Online</h1>
   </header>
   <div class="container">
-    <h2>Połącz się do sesji</h2>
-    <div class="flex">
+    <h2 id="join-title">Połącz się do sesji</h2>
+    <div class="flex" id="join-form">
       <label>Numer sesji: <input type="text" id="sessionId" placeholder="np. 14563"></label>
       <label>
         <select id="playerRole">
@@ -83,10 +100,6 @@
         </select>
       </label>
       <button onclick="joinSession()">Dołącz</button>
-    </div>
-    <div id="csv-loader" style="margin:15px 0; display:none;">
-      <label><b>Załaduj plik z kartami (CSV):</b> <input type="file" id="csvFile" accept=".csv"></label>
-      <button onclick="initGame()">Start gry</button>
     </div>
     <div id="share-url" style="display:none;">
       <strong>Podaj drugiemu graczowi ten link:</strong><br>
@@ -135,7 +148,29 @@
     let isMyTurn = false;
     let eventDeck = [];
     let eventCard = null;
-    let pendingCardIdx = null; // dla utrudnienia - czeka na wybranie celu
+    let pendingCardIdx = null;
+
+    // Wczytanie kart z karty.csv (automatycznie)
+    let csvLoadedData = null;
+    async function loadCSVfromServer() {
+      return new Promise(resolve => {
+        fetch("karty.csv")
+          .then(resp => resp.text())
+          .then(txt => {
+            Papa.parse(txt, {
+              header: true,
+              complete: res => {
+                csvLoadedData = res.data.filter(row => row["Nazwa"]);
+                resolve(csvLoadedData);
+              }
+            });
+          })
+          .catch(() => {
+            alert("Nie udało się załadować pliku karty.csv! Upewnij się, że plik znajduje się obok index.html.");
+            resolve(null);
+          });
+      });
+    }
 
     window.onload = function() {
       const params = new URLSearchParams(window.location.search);
@@ -155,6 +190,10 @@
         alert('Podaj numer sesji!');
         return;
       }
+      // ZABLOKUJ zmianę sesji i gracza
+      document.getElementById('join-form').style.display = 'none';
+      document.getElementById('join-title').style.display = 'none';
+
       document.getElementById('gameArea').style.display = '';
       document.getElementById('greeting').innerText = `Jesteś Gracz ${currentPlayer} | Sesja: ${currentSessionId}`;
       listenForGame();
@@ -167,44 +206,40 @@
           navigator.clipboard.writeText(url);
           this.innerText = "Skopiowano!";
           setTimeout(() => { this.innerText = "Kopiuj"; }, 1400);
-        }
-        document.getElementById('csv-loader').style.display = '';
+        };
+        // Gracz 1 ładuje karty i startuje grę jeśli jej nie ma
+        db.ref("sesje/" + currentSessionId + "/game").get().then(snapshot => {
+          if (!snapshot.exists()) startGame();
+        });
       } else {
         document.getElementById('share-url').style.display = 'none';
       }
     }
 
-    function initGame() {
-      const file = document.getElementById('csvFile').files[0];
-      if (!file) { alert("Wybierz plik CSV!"); return; }
-      Papa.parse(file, {
-        header: true,
-        complete: function(results) {
-          const data = results.data.filter(row => row["Nazwa"]);
-          let deck = data.filter(r => r["Typ karty"] !== "Pogoda");
-          eventDeck = data.filter(r => r["Typ karty"] === "Pogoda");
-          shuffle(deck);
-          shuffle(eventDeck);
-          let hands = [[], []];
-          for (let i = 0; i < 5; i++) {
-            hands[0].push(deck.pop());
-            hands[1].push(deck.pop());
-          }
-          // pierwsza karta pogody
-          let eCard = eventDeck.length ? eventDeck.pop() : null;
-          const state = {
-            deck: deck,
-            hands: hands,
-            points: [0, 0],
-            turn: 0,
-            log: [{ msg: "Gra rozpoczęta!", t: Date.now() }],
-            current: 0,
-            event: eCard,
-            eventDeck: eventDeck
-          };
-          db.ref("sesje/" + currentSessionId + "/game").set(state);
-        }
-      });
+    async function startGame() {
+      const data = await loadCSVfromServer();
+      if (!data) return;
+      let deck = data.filter(r => r["Typ karty"] !== "Pogoda");
+      eventDeck = data.filter(r => r["Typ karty"] === "Pogoda");
+      shuffle(deck);
+      shuffle(eventDeck);
+      let hands = [[], []];
+      for (let i = 0; i < 5; i++) {
+        hands[0].push(deck.pop());
+        hands[1].push(deck.pop());
+      }
+      let eCard = eventDeck.length ? eventDeck.pop() : null;
+      const state = {
+        deck: deck,
+        hands: hands,
+        points: [0, 0],
+        turn: 0,
+        log: [{ msg: "Gra rozpoczęta!", t: Date.now() }],
+        current: 0,
+        event: eCard,
+        eventDeck: eventDeck
+      };
+      db.ref("sesje/" + currentSessionId + "/game").set(state);
     }
 
     function listenForGame() {
@@ -220,7 +255,6 @@
     }
 
     function updateUI() {
-      // karta zdarzenia
       if (eventCard) {
         document.getElementById('event-box').innerHTML = `<b>${eventCard["Nazwa"] || ""}</b><br>
           <em>${eventCard["Efekt pozytywny"] || eventCard["Efekt negatywny"] || ""}</em>
@@ -231,7 +265,6 @@
       document.getElementById('score1').textContent = gameData.points ? gameData.points[0] : 0;
       document.getElementById('score2').textContent = gameData.points ? gameData.points[1] : 0;
       document.getElementById('turnInfo').textContent = "Tura: " + ((gameData.current||0)+1);
-      // ręka
       const handDiv = document.getElementById('hand');
       handDiv.innerHTML = "";
       isMyTurn = (currentPlayer-1) === (gameData.current||0);
@@ -255,54 +288,15 @@
         cardDiv.innerHTML = html;
         handDiv.appendChild(cardDiv);
       });
-      // log
       const logView = document.getElementById('logView');
       if (gameData.log) {
         logView.innerHTML = gameData.log.slice().reverse().map(x =>
-          `<div>${new Date(x.t).toLocaleTimeString()} – ${x.msg}</div>`).join("");
+          `<div>${new Date(x.t).toLocaleTimeString()} – ${x.msg}</div>`
+        ).join("");
       }
       document.getElementById("exchangeBtn").disabled = !isMyTurn;
     }
 
-    // ----------- K6 MODAL -----------
-    let k6Promise = null, k6Resolve = null;
-    function throwK6() {
-      document.getElementById("k6modal").style.display = "flex";
-      document.getElementById("k6result").textContent = "";
-      return new Promise(res => { k6Resolve = res; });
-    }
-    document.getElementById("k6btn").onclick = function() {
-      let i = 0, val = 1, interval;
-      interval = setInterval(() => {
-        val = Math.floor(Math.random() * 6) + 1;
-        document.getElementById("k6result").innerText = "🎲 " + val;
-        i++;
-        if (i > 11) {
-          clearInterval(interval);
-          setTimeout(() => {
-            document.getElementById("k6modal").style.display = "none";
-            k6Resolve(val);
-          }, 600);
-        }
-      }, 65);
-    };
-
-    // ----------- WYBÓR CELU UTRUDNIENIA (modal) -----------
-    let utrudnienieCard = null;
-    function showTargetModal(idx) {
-      pendingCardIdx = idx;
-      document.getElementById("targetModal").style.display = "flex";
-    }
-    function closeTargetModal() {
-      pendingCardIdx = null;
-      document.getElementById("targetModal").style.display = "none";
-    }
-    function resolveTargetPlayer(target) {
-      closeTargetModal();
-      doPlayUtrudnienie(pendingCardIdx, target);
-    }
-
-    // ----------- ZAGRYWANIE KARTY -----------
     async function playCard(idx) {
       if (!isMyTurn || !myHand[idx]) return;
       const card = myHand[idx];
@@ -314,21 +308,34 @@
       await doPlayCard(idx);
     }
 
+    function showTargetModal(idx) {
+      pendingCardIdx = idx;
+      document.getElementById("targetModal").style.display = "flex";
+    }
+    function closeTargetModal() {
+      pendingCardIdx = null;
+      document.getElementById("targetModal").style.display = "none";
+    }
+    async function resolveTargetPlayer(tg) {
+      closeTargetModal();
+      await doPlayUtrudnienie(pendingCardIdx, tg);
+      pendingCardIdx = null;
+    }
+
     async function doPlayUtrudnienie(idx, targetPlayer) {
       const card = myHand[idx];
       if (!card) return;
-      // Efekt negatywny utrudnienia
       let loss = extractPoints(card["Efekt negatywny"]);
       let result = loss;
       if (loss === "K6") result = await throwK6();
       let p = gameData.points.slice();
-      // Zastosuj efekt pogody na tę turę (matematyczny - do utrudnienia)
+      // Efekt pogody (negatywny)
       let eMod = extractPoints(eventCard && eventCard["Efekt negatywny"]);
       if (typeof eMod === "number") result += (eMod || 0);
       p[targetPlayer-1] = Math.max(0, p[targetPlayer-1] - result);
 
-      let hands = gameData.hands.slice();
-      let deck = gameData.deck.slice();
+      let hands = JSON.parse(JSON.stringify(gameData.hands));
+      let deck = (gameData.deck || []).slice();
       hands[currentPlayer-1][idx] = deck.length ? deck.pop() : null;
 
       let msg = `Gracz ${currentPlayer} zagrywa utrudnienie na Gracza ${targetPlayer} (${card["Nazwa"]}) za ${result} PChSz.`;
@@ -341,23 +348,21 @@
       let gain = extractPoints(card["Efekt pozytywny"]);
       let result = gain;
       if (gain === "K6") result = await throwK6();
-      // Efekt pogody na plus
       let eMod = extractPoints(eventCard && eventCard["Efekt pozytywny"]);
       if (typeof eMod === "number") result += (eMod || 0);
       let p = gameData.points.slice();
       p[currentPlayer-1] += result;
-      let hands = gameData.hands.slice();
-      let deck = gameData.deck.slice();
+      let hands = JSON.parse(JSON.stringify(gameData.hands));
+      let deck = (gameData.deck || []).slice();
       hands[currentPlayer-1][idx] = deck.length ? deck.pop() : null;
       let msg = `Gracz ${currentPlayer} zagrywa ${card["Nazwa"]} (+${result} PChSz).`;
       nextTurnAndUpdate(hands, deck, p, msg);
     }
 
-    // ----------- WYMIANA KART -----------
     function exchangeCard() {
       if (!isMyTurn) return;
-      let hands = gameData.hands.slice();
-      let deck = gameData.deck.slice();
+      let hands = JSON.parse(JSON.stringify(gameData.hands));
+      let deck = (gameData.deck || []).slice();
       let changed = false;
       myHand.forEach((card, idx) => {
         if (document.getElementById("chk"+idx).checked) {
@@ -370,13 +375,12 @@
       nextTurnAndUpdate(hands, deck, gameData.points, msg);
     }
 
-    // ----------- PEŁNA RUNDA I KARTA ZDARZENIA -----------
     function nextTurnAndUpdate(hands, deck, points, msg) {
-      // Jeżeli zaczynamy rundę (obaj zagrali), nowa karta pogody
+      // Zmiana rundy po obu graczach, nowa karta pogody:
       let next = 1 - (gameData.current||0);
       let turn = (gameData.turn||0)+1;
       let event = eventCard;
-      let eventDeckCopy = eventDeck.slice();
+      let eventDeckCopy = (gameData.eventDeck||[]).slice();
       if (next === 0 && eventDeckCopy.length) {
         event = eventDeckCopy.pop();
         msg += ` | Nowa karta zdarzenia: ${event["Nazwa"]}`;
@@ -388,7 +392,29 @@
       });
     }
 
-    // --- Pomocnicze
+    // K6 modal
+    function throwK6() {
+      return new Promise((resolve) => {
+        document.getElementById("k6modal").style.display = "flex";
+        document.getElementById("k6result").innerText = "";
+        document.getElementById("k6btn").onclick = function() {
+          let i = 0, val = 1, interval;
+          interval = setInterval(() => {
+            val = Math.floor(Math.random() * 6) + 1;
+            document.getElementById("k6result").innerText = "🎲 " + val;
+            i++;
+            if (i > 11) {
+              clearInterval(interval);
+              setTimeout(() => {
+                document.getElementById("k6modal").style.display = "none";
+                resolve(val);
+              }, 600);
+            }
+          }, 60);
+        };
+      });
+    }
+
     function shuffle(deck) {
       for (let i = deck.length-1; i>0; i--) {
         const j = Math.floor(Math.random() * (i+1));
