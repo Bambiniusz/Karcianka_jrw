@@ -14,6 +14,8 @@
     input[type=text], input[type=number] { font-size: 1em; border-radius: 5px; border: 1px solid #aaa; padding: 5px 9px; }
     button { padding: 8px 16px; border-radius: 5px; background: #3862ad; color: #fff; border: none; cursor: pointer; font-size: 1em; margin-top: 12px; }
     button:active { background: #26477b;}
+    #share-url { background: #e7f3ff; padding: 7px 12px; margin: 15px 0 5px 0; border-radius: 7px; word-break: break-all; color: #336;}
+    #share-url strong { color: #3877c7; }
   </style>
   <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/11.8.1/firebase-app-compat.js"></script>
@@ -54,6 +56,12 @@
       <button onclick="joinSession()">Dołącz</button>
     </div>
 
+    <div id="share-url" style="display:none;">
+      <strong>Podaj drugiemu graczowi ten link:</strong><br>
+      <span id="url-text"></span>
+      <button id="copyUrlBtn" style="margin-left: 10px; padding: 5px 10px; background:#3877c7;">Kopiuj</button>
+    </div>
+
     <div id="gameArea" style="display:none;">
       <h2 id="greeting"></h2>
       <div>
@@ -67,7 +75,19 @@
     let currentSessionId = '';
     let currentPlayer = 1;
 
-    function joinSession() {
+    // Sprawdź URL pod kątem sesji/gracza
+    window.onload = function() {
+      const params = new URLSearchParams(window.location.search);
+      const sId = params.get('sesja');
+      const pRole = params.get('gracz');
+      if (sId && pRole) {
+        document.getElementById('sessionId').value = sId;
+        document.getElementById('playerRole').value = pRole;
+        joinSession(true);
+      }
+    };
+
+    function joinSession(fromAuto = false) {
       currentSessionId = document.getElementById('sessionId').value.trim();
       currentPlayer = parseInt(document.getElementById('playerRole').value, 10);
       if (!currentSessionId) {
@@ -77,6 +97,21 @@
       document.getElementById('gameArea').style.display = '';
       document.getElementById('greeting').innerText = `Jesteś Gracz ${currentPlayer} | Sesja: ${currentSessionId}`;
       listenForMoves();
+
+      // Tylko Gracz 1 dostaje gotowy URL do przekazania Graczowi 2
+      if (currentPlayer === 1 && !fromAuto) {
+        const url = window.location.origin + window.location.pathname +
+          `?sesja=${encodeURIComponent(currentSessionId)}&gracz=2`;
+        document.getElementById('url-text').textContent = url;
+        document.getElementById('share-url').style.display = '';
+        document.getElementById('copyUrlBtn').onclick = function() {
+          navigator.clipboard.writeText(url);
+          this.innerText = "Skopiowano!";
+          setTimeout(() => { this.innerText = "Kopiuj"; }, 1400);
+        }
+      } else {
+        document.getElementById('share-url').style.display = 'none';
+      }
     }
 
     // Przykładowy testowy ruch — zrób tu swoją logikę gry (np. wysyłanie zagrywanych kart)
