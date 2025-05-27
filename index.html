@@ -148,6 +148,7 @@
     let isMyTurn = false;
     let eventDeck = [];
     let eventCard = null;
+    let pendingCardIdx = null; // <- poprawnosc wyboru indeksu
 
     // Wczytanie kart z karty.csv (automatycznie)
     let csvLoadedData = null;
@@ -196,7 +197,6 @@
       document.getElementById('gameArea').style.display = '';
       document.getElementById('greeting').innerText = `Jesteś Gracz ${currentPlayer} | Sesja: ${currentSessionId}`;
       listenForGame();
-      // Poprawka: Gracz 1 startuje tylko wtedy, gdy gra nie istnieje i NIE ma ?gracz=2 w URL (czyli nie Gracz 2!).
       if (currentPlayer === 1 && !fromAuto) {
         const url = window.location.origin + window.location.pathname +
           `?sesja=${encodeURIComponent(currentSessionId)}&gracz=2`;
@@ -302,25 +302,30 @@
       const card = myHand[idx];
       // Jeśli to Utrudnienie, pokaż modal wyboru celu:
       if ((card["Typ karty"]||"").toLowerCase().includes("utrudnienie")) {
-        showTargetModal(idx);
+        pendingCardIdx = idx; // naprawa - ZACHOWAJ INDEKS
+        showTargetModal();
         return;
       }
       await doPlayCard(idx);
     }
 
-    // --- Utrudnienie: odejmowanie punktów (poprawione) ---
+    // --- Utrudnienie: zawsze odejmij sumę wartości i efektu pogody (jeśli są) ---
     async function doPlayUtrudnienie(idx, targetPlayer) {
       const card = myHand[idx];
       if (!card) return;
       let loss = extractPoints(card["Efekt negatywny"]);
-      let result = (loss === "K6") ? await throwK6() : Math.abs(loss);
-
-      // Efekt pogody (negatywny) – tylko jeśli istnieje, tylko jeśli liczba, tylko jeśli < 0
+      let result = 0;
+      if (loss === "K6") {
+        result = await throwK6();
+      } else if (typeof loss === "number") {
+        result = Math.abs(loss);
+      }
+      // Pogoda – dolicz, jeśli negatywna
       let eMod = extractPoints(eventCard && eventCard["Efekt negatywny"]);
       if (typeof eMod === "number" && eMod < 0) {
         result += Math.abs(eMod);
       }
-      // ODEJMUJEMY wyniki, nie dodajemy!
+      // ODEJMUJEMY od punktów wybranego gracza
       let p = gameData.points.slice();
       p[targetPlayer-1] = Math.max(0, p[targetPlayer-1] - result);
 
@@ -332,20 +337,19 @@
       nextTurnAndUpdate(hands, deck, p, msg);
     }
 
-    // Pozostała logika BEZ zmian:
-    let pendingCardIdx = null;
-    function showTargetModal(idx) {
-      pendingCardIdx = idx;
+    // Modal wyboru celu:
+    function showTargetModal() {
       document.getElementById("targetModal").style.display = "flex";
     }
     function closeTargetModal() {
-      pendingCardIdx = null;
       document.getElementById("targetModal").style.display = "none";
     }
     async function resolveTargetPlayer(tg) {
       closeTargetModal();
-      await doPlayUtrudnienie(pendingCardIdx, tg);
-      pendingCardIdx = null;
+      if (typeof pendingCardIdx === 'number') {
+        await doPlayUtrudnienie(pendingCardIdx, tg);
+        pendingCardIdx = null;
+      }
     }
 
     async function doPlayCard(idx) {
