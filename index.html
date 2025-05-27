@@ -309,7 +309,7 @@
       await doPlayCard(idx);
     }
 
-    // --- Utrudnienie: zawsze odejmij sumę wartości i efektu pogody (jeśli są) ---
+    // --- Utrudnienie: zawsze dolicz globalny efekt pogody (nieważne czy + czy -)
     async function doPlayUtrudnienie(idx, targetPlayer) {
       const card = myHand[idx];
       if (!card) return;
@@ -318,22 +318,21 @@
       if (loss === "K6") {
         result = await throwK6();
       } else if (typeof loss === "number") {
-        result = Math.abs(loss);
+        result = loss;
       }
-      // Pogoda – dolicz, jeśli negatywna
+      // Pogoda – dolicz, jeśli jest liczba (nieważne czy + czy -)
       let eMod = extractPoints(eventCard && eventCard["Efekt negatywny"]);
-      if (typeof eMod === "number" && eMod < 0) {
-        result += Math.abs(eMod);
+      if (typeof eMod === "number") {
+        result += eMod;
       }
-      // ODEJMUJEMY od punktów wybranego gracza
+      // ODEJMUJEMY od punktów wybranego gracza, zawsze liczymy bezwzględną wartość efektu
       let p = gameData.points.slice();
-      p[targetPlayer-1] = Math.max(0, p[targetPlayer-1] - result);
-
+      p[targetPlayer-1] = Math.max(0, p[targetPlayer-1] - Math.abs(result));
       let hands = JSON.parse(JSON.stringify(gameData.hands));
       let deck = (gameData.deck || []).slice();
       hands[currentPlayer-1][idx] = deck.length ? deck.pop() : null;
 
-      let msg = `Gracz ${currentPlayer} zagrywa utrudnienie na Gracza ${targetPlayer} (${card["Nazwa"]}) za ${result} PChSz.`;
+      let msg = `Gracz ${currentPlayer} zagrywa utrudnienie na Gracza ${targetPlayer} (${card["Nazwa"]}) za ${Math.abs(result)} PChSz.`;
       nextTurnAndUpdate(hands, deck, p, msg);
     }
 
@@ -352,6 +351,7 @@
       }
     }
 
+    // --- Postęp: zawsze dolicz globalny efekt pogody (nieważne czy + czy -)
     async function doPlayCard(idx) {
       const card = myHand[idx];
       if (!card) return;
@@ -359,13 +359,13 @@
       let result = gain;
       if (gain === "K6") result = await throwK6();
       let eMod = extractPoints(eventCard && eventCard["Efekt pozytywny"]);
-      if (typeof eMod === "number" && eMod > 0) result += eMod;
+      if (typeof eMod === "number") result += eMod;
       let p = gameData.points.slice();
       p[currentPlayer-1] += result;
       let hands = JSON.parse(JSON.stringify(gameData.hands));
       let deck = (gameData.deck || []).slice();
       hands[currentPlayer-1][idx] = deck.length ? deck.pop() : null;
-      let msg = `Gracz ${currentPlayer} zagrywa ${card["Nazwa"]} (+${result} PChSz).`;
+      let msg = `Gracz ${currentPlayer} zagrywa ${card["Nazwa"]} (${result >= 0 ? '+' : ''}${result} PChSz).`;
       nextTurnAndUpdate(hands, deck, p, msg);
     }
 
