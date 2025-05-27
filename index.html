@@ -2,11 +2,11 @@
 <html lang="pl">
 <head>
   <meta charset="UTF-8" />
-  <title>Symulator JRW Online (Firebase)</title>
+  <title>Symulator JRW Online – Zdarzenia + K6 + Utrudnienia</title>
   <style>
     body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f4fa; margin: 0; padding: 0; }
     header { background: #3862ad; color: #fff; padding: 18px 28px; }
-    .container { max-width: 650px; margin: 32px auto; background: #fff; border-radius: 13px; box-shadow: 0 2px 18px #3862ad20; padding: 24px; }
+    .container { max-width: 680px; margin: 32px auto; background: #fff; border-radius: 13px; box-shadow: 0 2px 18px #3862ad20; padding: 24px; }
     h2 { color: #3862ad; }
     .flex { display: flex; gap: 12px; align-items: center; }
     label { margin-right: 7px; }
@@ -28,6 +28,22 @@
     .card small { color: #3862ad; font-size: 0.93em; display:block; margin-top: 4px;}
     .hand .card button { margin: 6px 2px 0 0; font-size: 0.92em;}
     .scorebar { margin-top:10px; background:#eaf1fa; border-radius:8px; padding: 9px 11px;}
+    #event-box {
+      background: #eafcf3; border: 2px solid #32ba92; color: #236b56;
+      padding: 12px 15px; border-radius: 9px; margin-bottom: 12px; margin-top: 8px;
+      font-size: 1.09em; font-weight: 500;
+    }
+    #k6modal, #targetModal {
+      display: none; position: fixed; z-index: 1001; top:0; left:0; right:0; bottom:0;
+      background:rgba(0,0,0,0.35); align-items:center; justify-content:center;
+    }
+    #k6modal-content, #targetModal-content {
+      background: #fff; padding: 32px 40px; border-radius: 12px; text-align:center;
+      min-width:220px; box-shadow: 0 4px 18px #3333;
+    }
+    #k6btn { margin-top: 15px; font-size: 1.4em; background: #3862ad;}
+    #k6result { font-size:2.5em; margin-top:19px; }
+    #targetModal-content button { margin: 6px 11px 0 11px;}
   </style>
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.1/papaparse.min.js"></script>
   <!-- Firebase SDKs -->
@@ -77,9 +93,9 @@
       <span id="url-text"></span>
       <button id="copyUrlBtn" style="margin-left: 10px; padding: 5px 10px; background:#3877c7;">Kopiuj</button>
     </div>
-
     <div id="gameArea" style="display:none;">
       <h2 id="greeting"></h2>
+      <div id="event-box"></div>
       <div class="scorebar">
         Gracz 1: <span id="score1">0</span> PChSz | Gracz 2: <span id="score2">0</span> PChSz
         <span id="turnInfo" style="float:right;"></span>
@@ -92,15 +108,35 @@
       <div class="log" id="logView"></div>
     </div>
   </div>
+  <!-- MODAL K6 -->
+  <div id="k6modal">
+    <div id="k6modal-content">
+      <h2>Rzut Kostką K6</h2>
+      <p>Kliknij, by wylosować liczbę od 1 do 6:</p>
+      <button id="k6btn">🎲 Rzuć!</button>
+      <div id="k6result"></div>
+    </div>
+  </div>
+  <!-- MODAL WYBORU GRACZA -->
+  <div id="targetModal">
+    <div id="targetModal-content">
+      <h3>Zagrywasz kartę utrudnienia – wybierz gracza:</h3>
+      <button onclick="resolveTargetPlayer(1)">Gracz 1</button>
+      <button onclick="resolveTargetPlayer(2)">Gracz 2</button>
+      <div style="margin-top:14px;"><button onclick="closeTargetModal()">Anuluj</button></div>
+    </div>
+  </div>
   <script>
     // ----------- LOGIKA GRY JRW ----------- //
     let currentSessionId = '';
     let currentPlayer = 1;
-    let gameData = null;   // Pełny stan sesji (z Firebase)
+    let gameData = null;
     let myHand = [];
     let isMyTurn = false;
+    let eventDeck = [];
+    let eventCard = null;
+    let pendingCardIdx = null; // dla utrudnienia - czeka na wybranie celu
 
-    // --- Połącz się do sesji, obsłuż URL:
     window.onload = function() {
       const params = new URLSearchParams(window.location.search);
       const sId = params.get('sesja');
@@ -122,7 +158,6 @@
       document.getElementById('gameArea').style.display = '';
       document.getElementById('greeting').innerText = `Jesteś Gracz ${currentPlayer} | Sesja: ${currentSessionId}`;
       listenForGame();
-      // Pokaz link tylko dla Gracza 1
       if (currentPlayer === 1 && !fromAuto) {
         const url = window.location.origin + window.location.pathname +
           `?sesja=${encodeURIComponent(currentSessionId)}&gracz=2`;
@@ -139,7 +174,6 @@
       }
     }
 
-    // --- Ładowanie i inicjalizacja gry przez Gracza 1
     function initGame() {
       const file = document.getElementById('csvFile').files[0];
       if (!file) { alert("Wybierz plik CSV!"); return; }
@@ -148,39 +182,52 @@
         complete: function(results) {
           const data = results.data.filter(row => row["Nazwa"]);
           let deck = data.filter(r => r["Typ karty"] !== "Pogoda");
+          eventDeck = data.filter(r => r["Typ karty"] === "Pogoda");
           shuffle(deck);
+          shuffle(eventDeck);
           let hands = [[], []];
           for (let i = 0; i < 5; i++) {
             hands[0].push(deck.pop());
             hands[1].push(deck.pop());
           }
+          // pierwsza karta pogody
+          let eCard = eventDeck.length ? eventDeck.pop() : null;
           const state = {
             deck: deck,
             hands: hands,
             points: [0, 0],
             turn: 0,
             log: [{ msg: "Gra rozpoczęta!", t: Date.now() }],
-            current: 0 // 0 - gracz1, 1 - gracz2
+            current: 0,
+            event: eCard,
+            eventDeck: eventDeck
           };
           db.ref("sesje/" + currentSessionId + "/game").set(state);
         }
       });
     }
 
-    // --- Słuchaj na zmiany w stanie gry
     function listenForGame() {
       db.ref("sesje/" + currentSessionId + "/game").on("value", snapshot => {
         if (!snapshot.exists()) return;
         gameData = snapshot.val();
-        // Odswiez interfejs
         if (!gameData.hands) return;
         myHand = gameData.hands[currentPlayer-1] || [];
+        eventCard = gameData.event || null;
+        eventDeck = gameData.eventDeck || [];
         updateUI();
       });
     }
 
     function updateUI() {
-      // punkty i tura
+      // karta zdarzenia
+      if (eventCard) {
+        document.getElementById('event-box').innerHTML = `<b>${eventCard["Nazwa"] || ""}</b><br>
+          <em>${eventCard["Efekt pozytywny"] || eventCard["Efekt negatywny"] || ""}</em>
+          <br><small>${eventCard["Opis żartobliwy"] || ""}</small>`;
+      } else {
+        document.getElementById('event-box').innerHTML = "(Brak aktualnego zdarzenia)";
+      }
       document.getElementById('score1').textContent = gameData.points ? gameData.points[0] : 0;
       document.getElementById('score2').textContent = gameData.points ? gameData.points[1] : 0;
       document.getElementById('turnInfo').textContent = "Tura: " + ((gameData.current||0)+1);
@@ -214,39 +261,99 @@
         logView.innerHTML = gameData.log.slice().reverse().map(x =>
           `<div>${new Date(x.t).toLocaleTimeString()} – ${x.msg}</div>`).join("");
       }
-      // przycisk wymiany
       document.getElementById("exchangeBtn").disabled = !isMyTurn;
     }
 
-    // --- Zagranie karty
-    function playCard(idx) {
-      if (!isMyTurn) return;
+    // ----------- K6 MODAL -----------
+    let k6Promise = null, k6Resolve = null;
+    function throwK6() {
+      document.getElementById("k6modal").style.display = "flex";
+      document.getElementById("k6result").textContent = "";
+      return new Promise(res => { k6Resolve = res; });
+    }
+    document.getElementById("k6btn").onclick = function() {
+      let i = 0, val = 1, interval;
+      interval = setInterval(() => {
+        val = Math.floor(Math.random() * 6) + 1;
+        document.getElementById("k6result").innerText = "🎲 " + val;
+        i++;
+        if (i > 11) {
+          clearInterval(interval);
+          setTimeout(() => {
+            document.getElementById("k6modal").style.display = "none";
+            k6Resolve(val);
+          }, 600);
+        }
+      }, 65);
+    };
+
+    // ----------- WYBÓR CELU UTRUDNIENIA (modal) -----------
+    let utrudnienieCard = null;
+    function showTargetModal(idx) {
+      pendingCardIdx = idx;
+      document.getElementById("targetModal").style.display = "flex";
+    }
+    function closeTargetModal() {
+      pendingCardIdx = null;
+      document.getElementById("targetModal").style.display = "none";
+    }
+    function resolveTargetPlayer(target) {
+      closeTargetModal();
+      doPlayUtrudnienie(pendingCardIdx, target);
+    }
+
+    // ----------- ZAGRYWANIE KARTY -----------
+    async function playCard(idx) {
+      if (!isMyTurn || !myHand[idx]) return;
       const card = myHand[idx];
-      const opponent = (currentPlayer===1)?1:0;
-      // prosta logika punktów
-      let gain = extractPoints(card["Efekt pozytywny"]);
-      let loss = extractPoints(card["Efekt negatywny"]);
-      let p = gameData.points.slice();
-      if (card["Typ karty"]==="Utrudnienie") {
-        p[1-(currentPlayer-1)] = Math.max(0, p[1-(currentPlayer-1)]-loss);
-      } else {
-        p[currentPlayer-1] += gain;
+      // Jeśli to Utrudnienie, pokaż modal wyboru celu:
+      if ((card["Typ karty"]||"").toLowerCase().includes("utrudnienie")) {
+        showTargetModal(idx);
+        return;
       }
-      // zamień kartę na nową z talii
+      await doPlayCard(idx);
+    }
+
+    async function doPlayUtrudnienie(idx, targetPlayer) {
+      const card = myHand[idx];
+      if (!card) return;
+      // Efekt negatywny utrudnienia
+      let loss = extractPoints(card["Efekt negatywny"]);
+      let result = loss;
+      if (loss === "K6") result = await throwK6();
+      let p = gameData.points.slice();
+      // Zastosuj efekt pogody na tę turę (matematyczny - do utrudnienia)
+      let eMod = extractPoints(eventCard && eventCard["Efekt negatywny"]);
+      if (typeof eMod === "number") result += (eMod || 0);
+      p[targetPlayer-1] = Math.max(0, p[targetPlayer-1] - result);
+
       let hands = gameData.hands.slice();
       let deck = gameData.deck.slice();
       hands[currentPlayer-1][idx] = deck.length ? deck.pop() : null;
-      // log
-      let msg = `Gracz ${currentPlayer} zagrywa ${card["Nazwa"]} (${card["Typ karty"]})`;
-      // zmiana tury
-      let turn = (gameData.turn||0)+1;
-      let next = 1 - (gameData.current||0);
-      db.ref("sesje/" + currentSessionId + "/game").update({
-        hands, deck, points: p, log: (gameData.log||[]).concat([{ msg, t:Date.now() }]), turn, current: next
-      });
+
+      let msg = `Gracz ${currentPlayer} zagrywa utrudnienie na Gracza ${targetPlayer} (${card["Nazwa"]}) za ${result} PChSz.`;
+      nextTurnAndUpdate(hands, deck, p, msg);
     }
 
-    // --- Wymiana kart (mulligan)
+    async function doPlayCard(idx) {
+      const card = myHand[idx];
+      if (!card) return;
+      let gain = extractPoints(card["Efekt pozytywny"]);
+      let result = gain;
+      if (gain === "K6") result = await throwK6();
+      // Efekt pogody na plus
+      let eMod = extractPoints(eventCard && eventCard["Efekt pozytywny"]);
+      if (typeof eMod === "number") result += (eMod || 0);
+      let p = gameData.points.slice();
+      p[currentPlayer-1] += result;
+      let hands = gameData.hands.slice();
+      let deck = gameData.deck.slice();
+      hands[currentPlayer-1][idx] = deck.length ? deck.pop() : null;
+      let msg = `Gracz ${currentPlayer} zagrywa ${card["Nazwa"]} (+${result} PChSz).`;
+      nextTurnAndUpdate(hands, deck, p, msg);
+    }
+
+    // ----------- WYMIANA KART -----------
     function exchangeCard() {
       if (!isMyTurn) return;
       let hands = gameData.hands.slice();
@@ -260,10 +367,24 @@
       });
       if (!changed) return;
       let msg = `Gracz ${currentPlayer} wymienia zaznaczone karty.`;
-      let turn = (gameData.turn||0)+1;
+      nextTurnAndUpdate(hands, deck, gameData.points, msg);
+    }
+
+    // ----------- PEŁNA RUNDA I KARTA ZDARZENIA -----------
+    function nextTurnAndUpdate(hands, deck, points, msg) {
+      // Jeżeli zaczynamy rundę (obaj zagrali), nowa karta pogody
       let next = 1 - (gameData.current||0);
+      let turn = (gameData.turn||0)+1;
+      let event = eventCard;
+      let eventDeckCopy = eventDeck.slice();
+      if (next === 0 && eventDeckCopy.length) {
+        event = eventDeckCopy.pop();
+        msg += ` | Nowa karta zdarzenia: ${event["Nazwa"]}`;
+      }
       db.ref("sesje/" + currentSessionId + "/game").update({
-        hands, deck, log: (gameData.log||[]).concat([{ msg, t:Date.now() }]), turn, current: next
+        hands, deck, points, event, eventDeck: eventDeckCopy,
+        log: (gameData.log||[]).concat([{ msg, t:Date.now() }]),
+        turn, current: next
       });
     }
 
@@ -276,6 +397,7 @@
     }
     function extractPoints(txt) {
       if (!txt) return 0;
+      if (txt.toUpperCase().includes("K6")) return "K6";
       const m = txt.match(/[+-]?\d+/);
       return m ? parseInt(m[0]) : 0;
     }
