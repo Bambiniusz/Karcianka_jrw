@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <title>Symulator JRW Online (Firebase Demo)</title>
+  <style>
+    body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f4fa; margin: 0; padding: 0; }
+    header { background: #3862ad; color: #fff; padding: 18px 28px; }
+    .container { max-width: 600px; margin: 32px auto; background: #fff; border-radius: 13px; box-shadow: 0 2px 18px #3862ad20; padding: 24px; }
+    h2 { color: #3862ad; }
+    .flex { display: flex; gap: 12px; align-items: center; }
+    label { margin-right: 7px; }
+    .log { background: #f4f8fd; margin-top: 18px; padding: 10px; border-radius: 6px; min-height: 80px; font-size: 0.96em; color: #333; }
+    input[type=text], input[type=number] { font-size: 1em; border-radius: 5px; border: 1px solid #aaa; padding: 5px 9px; }
+    button { padding: 8px 16px; border-radius: 5px; background: #3862ad; color: #fff; border: none; cursor: pointer; font-size: 1em; margin-top: 12px; }
+    button:active { background: #26477b;}
+  </style>
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/11.8.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.8.1/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.8.1/firebase-analytics-compat.js"></script>
+  <script>
+    // KONFIGURACJA Twojej aplikacji Firebase:
+    const firebaseConfig = {
+      apiKey: "AIzaSyChpDOPZnpIiG3T1x2kcTh8Z3WMC952S5s",
+      authDomain: "jrw-karcianka.firebaseapp.com",
+      databaseURL: "https://jrw-karcianka-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "jrw-karcianka",
+      storageBucket: "jrw-karcianka.firebasestorage.app",
+      messagingSenderId: "523462935156",
+      appId: "1:523462935156:web:7665a0b8f9603dce20c721",
+      measurementId: "G-BHD2M8DLW6"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    if (window.firebase.analytics) firebase.analytics();
+    const db = firebase.database();
+  </script>
+</head>
+<body>
+  <header>
+    <h1>Symulator JRW – Tryb Online (demo)</h1>
+  </header>
+  <div class="container">
+    <h2>Połącz się do sesji</h2>
+    <div class="flex">
+      <label>Numer sesji: <input type="text" id="sessionId" placeholder="np. 14563"></label>
+      <label>
+        <select id="playerRole">
+          <option value="1">Gracz 1</option>
+          <option value="2">Gracz 2</option>
+        </select>
+      </label>
+      <button onclick="joinSession()">Dołącz</button>
+    </div>
+
+    <div id="gameArea" style="display:none;">
+      <h2 id="greeting"></h2>
+      <div>
+        <button onclick="sendTestMove()">Wyślij testowy ruch</button>
+      </div>
+      <div class="log" id="logView"></div>
+    </div>
+  </div>
+  <script>
+    // GLOBALNE ZMIENNE SESJI
+    let currentSessionId = '';
+    let currentPlayer = 1;
+
+    function joinSession() {
+      currentSessionId = document.getElementById('sessionId').value.trim();
+      currentPlayer = parseInt(document.getElementById('playerRole').value, 10);
+      if (!currentSessionId) {
+        alert('Podaj numer sesji!');
+        return;
+      }
+      document.getElementById('gameArea').style.display = '';
+      document.getElementById('greeting').innerText = `Jesteś Gracz ${currentPlayer} | Sesja: ${currentSessionId}`;
+      listenForMoves();
+    }
+
+    // Przykładowy testowy ruch — zrób tu swoją logikę gry (np. wysyłanie zagrywanych kart)
+    function sendTestMove() {
+      const move = {
+        gracz: currentPlayer,
+        akcja: "Testowy ruch",
+        timestamp: Date.now(),
+        losowa: Math.floor(Math.random() * 100)
+      };
+      db.ref("sesje/" + currentSessionId + "/moves").push(move);
+    }
+
+    // Słuchaj zmian w sesji i wyświetlaj log (przy każdej akcji któregoś z graczy)
+    function listenForMoves() {
+      const logView = document.getElementById("logView");
+      db.ref("sesje/" + currentSessionId + "/moves").on("value", snapshot => {
+        let html = "";
+        const data = snapshot.val();
+        if (data) {
+          const arr = Object.values(data).sort((a, b) => a.timestamp - b.timestamp);
+          arr.forEach(move => {
+            html += `Gracz ${move.gracz}: <b>${move.akcja}</b> (losowa: ${move.losowa})<br>`;
+          });
+        } else {
+          html = "<i>(Brak ruchów w tej sesji...)</i>";
+        }
+        logView.innerHTML = html;
+      });
+    }
+  </script>
+</body>
+</html>
