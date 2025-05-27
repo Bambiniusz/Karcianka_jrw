@@ -2,21 +2,34 @@
 <html lang="pl">
 <head>
   <meta charset="UTF-8" />
-  <title>Symulator JRW Online (Firebase Demo)</title>
+  <title>Symulator JRW Online (Firebase)</title>
   <style>
     body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f4fa; margin: 0; padding: 0; }
     header { background: #3862ad; color: #fff; padding: 18px 28px; }
-    .container { max-width: 600px; margin: 32px auto; background: #fff; border-radius: 13px; box-shadow: 0 2px 18px #3862ad20; padding: 24px; }
+    .container { max-width: 650px; margin: 32px auto; background: #fff; border-radius: 13px; box-shadow: 0 2px 18px #3862ad20; padding: 24px; }
     h2 { color: #3862ad; }
     .flex { display: flex; gap: 12px; align-items: center; }
     label { margin-right: 7px; }
     .log { background: #f4f8fd; margin-top: 18px; padding: 10px; border-radius: 6px; min-height: 80px; font-size: 0.96em; color: #333; }
-    input[type=text], input[type=number] { font-size: 1em; border-radius: 5px; border: 1px solid #aaa; padding: 5px 9px; }
+    input[type=text], input[type=number], input[type=file] { font-size: 1em; border-radius: 5px; border: 1px solid #aaa; padding: 5px 9px; }
     button { padding: 8px 16px; border-radius: 5px; background: #3862ad; color: #fff; border: none; cursor: pointer; font-size: 1em; margin-top: 12px; }
     button:active { background: #26477b;}
     #share-url { background: #e7f3ff; padding: 7px 12px; margin: 15px 0 5px 0; border-radius: 7px; word-break: break-all; color: #336;}
     #share-url strong { color: #3877c7; }
+    .hand { display: flex; flex-wrap: wrap; gap: 10px; min-height: 110px; margin: 12px 0;}
+    .card {
+      border-radius: 10px; background: #f9fcff; border: 2px solid #c5d8ff; min-width: 160px; max-width: 185px;
+      box-shadow: 0 1px 4px #aaa2; padding: 12px 9px; font-size: 0.96em; position: relative;
+    }
+    .card.utrudnienie { border-color: #ffb8b3; background: #fff6f6;}
+    .card.postep { border-color: #b7e7a3; background: #f8fff5;}
+    .card.pogoda { border-color: #9fe3d7; background: #f2fffd;}
+    .card.jrw { border-color: #dac9fa; background: #f7f5fe;}
+    .card small { color: #3862ad; font-size: 0.93em; display:block; margin-top: 4px;}
+    .hand .card button { margin: 6px 2px 0 0; font-size: 0.92em;}
+    .scorebar { margin-top:10px; background:#eaf1fa; border-radius:8px; padding: 9px 11px;}
   </style>
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.1/papaparse.min.js"></script>
   <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/11.8.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/11.8.1/firebase-database-compat.js"></script>
@@ -41,7 +54,7 @@
 </head>
 <body>
   <header>
-    <h1>Symulator JRW – Tryb Online (demo)</h1>
+    <h1>Symulator JRW – Tryb Online (DEMO)</h1>
   </header>
   <div class="container">
     <h2>Połącz się do sesji</h2>
@@ -55,7 +68,10 @@
       </label>
       <button onclick="joinSession()">Dołącz</button>
     </div>
-
+    <div id="csv-loader" style="margin:15px 0; display:none;">
+      <label><b>Załaduj plik z kartami (CSV):</b> <input type="file" id="csvFile" accept=".csv"></label>
+      <button onclick="initGame()">Start gry</button>
+    </div>
     <div id="share-url" style="display:none;">
       <strong>Podaj drugiemu graczowi ten link:</strong><br>
       <span id="url-text"></span>
@@ -64,18 +80,27 @@
 
     <div id="gameArea" style="display:none;">
       <h2 id="greeting"></h2>
-      <div>
-        <button onclick="sendTestMove()">Wyślij testowy ruch</button>
+      <div class="scorebar">
+        Gracz 1: <span id="score1">0</span> PChSz | Gracz 2: <span id="score2">0</span> PChSz
+        <span id="turnInfo" style="float:right;"></span>
+      </div>
+      <h3>Twoja ręka:</h3>
+      <div class="hand" id="hand"></div>
+      <div style="margin-top:14px;">
+        <button onclick="exchangeCard()" id="exchangeBtn">Wymień zaznaczone</button>
       </div>
       <div class="log" id="logView"></div>
     </div>
   </div>
   <script>
-    // GLOBALNE ZMIENNE SESJI
+    // ----------- LOGIKA GRY JRW ----------- //
     let currentSessionId = '';
     let currentPlayer = 1;
+    let gameData = null;   // Pełny stan sesji (z Firebase)
+    let myHand = [];
+    let isMyTurn = false;
 
-    // Sprawdź URL pod kątem sesji/gracza
+    // --- Połącz się do sesji, obsłuż URL:
     window.onload = function() {
       const params = new URLSearchParams(window.location.search);
       const sId = params.get('sesja');
@@ -96,9 +121,8 @@
       }
       document.getElementById('gameArea').style.display = '';
       document.getElementById('greeting').innerText = `Jesteś Gracz ${currentPlayer} | Sesja: ${currentSessionId}`;
-      listenForMoves();
-
-      // Tylko Gracz 1 dostaje gotowy URL do przekazania Graczowi 2
+      listenForGame();
+      // Pokaz link tylko dla Gracza 1
       if (currentPlayer === 1 && !fromAuto) {
         const url = window.location.origin + window.location.pathname +
           `?sesja=${encodeURIComponent(currentSessionId)}&gracz=2`;
@@ -109,38 +133,151 @@
           this.innerText = "Skopiowano!";
           setTimeout(() => { this.innerText = "Kopiuj"; }, 1400);
         }
+        document.getElementById('csv-loader').style.display = '';
       } else {
         document.getElementById('share-url').style.display = 'none';
       }
     }
 
-    // Przykładowy testowy ruch — zrób tu swoją logikę gry (np. wysyłanie zagrywanych kart)
-    function sendTestMove() {
-      const move = {
-        gracz: currentPlayer,
-        akcja: "Testowy ruch",
-        timestamp: Date.now(),
-        losowa: Math.floor(Math.random() * 100)
-      };
-      db.ref("sesje/" + currentSessionId + "/moves").push(move);
+    // --- Ładowanie i inicjalizacja gry przez Gracza 1
+    function initGame() {
+      const file = document.getElementById('csvFile').files[0];
+      if (!file) { alert("Wybierz plik CSV!"); return; }
+      Papa.parse(file, {
+        header: true,
+        complete: function(results) {
+          const data = results.data.filter(row => row["Nazwa"]);
+          let deck = data.filter(r => r["Typ karty"] !== "Pogoda");
+          shuffle(deck);
+          let hands = [[], []];
+          for (let i = 0; i < 5; i++) {
+            hands[0].push(deck.pop());
+            hands[1].push(deck.pop());
+          }
+          const state = {
+            deck: deck,
+            hands: hands,
+            points: [0, 0],
+            turn: 0,
+            log: [{ msg: "Gra rozpoczęta!", t: Date.now() }],
+            current: 0 // 0 - gracz1, 1 - gracz2
+          };
+          db.ref("sesje/" + currentSessionId + "/game").set(state);
+        }
+      });
     }
 
-    // Słuchaj zmian w sesji i wyświetlaj log (przy każdej akcji któregoś z graczy)
-    function listenForMoves() {
-      const logView = document.getElementById("logView");
-      db.ref("sesje/" + currentSessionId + "/moves").on("value", snapshot => {
-        let html = "";
-        const data = snapshot.val();
-        if (data) {
-          const arr = Object.values(data).sort((a, b) => a.timestamp - b.timestamp);
-          arr.forEach(move => {
-            html += `Gracz ${move.gracz}: <b>${move.akcja}</b> (losowa: ${move.losowa})<br>`;
-          });
-        } else {
-          html = "<i>(Brak ruchów w tej sesji...)</i>";
-        }
-        logView.innerHTML = html;
+    // --- Słuchaj na zmiany w stanie gry
+    function listenForGame() {
+      db.ref("sesje/" + currentSessionId + "/game").on("value", snapshot => {
+        if (!snapshot.exists()) return;
+        gameData = snapshot.val();
+        // Odswiez interfejs
+        if (!gameData.hands) return;
+        myHand = gameData.hands[currentPlayer-1] || [];
+        updateUI();
       });
+    }
+
+    function updateUI() {
+      // punkty i tura
+      document.getElementById('score1').textContent = gameData.points ? gameData.points[0] : 0;
+      document.getElementById('score2').textContent = gameData.points ? gameData.points[1] : 0;
+      document.getElementById('turnInfo').textContent = "Tura: " + ((gameData.current||0)+1);
+      // ręka
+      const handDiv = document.getElementById('hand');
+      handDiv.innerHTML = "";
+      isMyTurn = (currentPlayer-1) === (gameData.current||0);
+      myHand.forEach((card, idx) => {
+        if (!card) return;
+        let type = (card["Typ karty"]||"").toLowerCase();
+        let cls = "card";
+        if (type.includes("utrudnienie")) cls += " utrudnienie";
+        if (type.includes("postęp")) cls += " postep";
+        if (type.includes("pogoda")) cls += " pogoda";
+        if (type.includes("jrw")) cls += " jrw";
+        let html = `<b>${card["Nazwa"]}</b><br>
+          <i>${card["Typ karty"]}</i><br>
+          <b>+:</b> ${card["Efekt pozytywny"]||"-"}<br>
+          <b>-:</b> ${card["Efekt negatywny"]||"-"}<br>
+          <small>${card["Opis żartobliwy"]||""}</small><br>
+          <input type="checkbox" id="chk${idx}" style="margin-top:7px;">
+          <button onclick="playCard(${idx})" ${!isMyTurn?'disabled':''}>Zagraj</button>`;
+        let cardDiv = document.createElement("div");
+        cardDiv.className = cls;
+        cardDiv.innerHTML = html;
+        handDiv.appendChild(cardDiv);
+      });
+      // log
+      const logView = document.getElementById('logView');
+      if (gameData.log) {
+        logView.innerHTML = gameData.log.slice().reverse().map(x =>
+          `<div>${new Date(x.t).toLocaleTimeString()} – ${x.msg}</div>`).join("");
+      }
+      // przycisk wymiany
+      document.getElementById("exchangeBtn").disabled = !isMyTurn;
+    }
+
+    // --- Zagranie karty
+    function playCard(idx) {
+      if (!isMyTurn) return;
+      const card = myHand[idx];
+      const opponent = (currentPlayer===1)?1:0;
+      // prosta logika punktów
+      let gain = extractPoints(card["Efekt pozytywny"]);
+      let loss = extractPoints(card["Efekt negatywny"]);
+      let p = gameData.points.slice();
+      if (card["Typ karty"]==="Utrudnienie") {
+        p[1-(currentPlayer-1)] = Math.max(0, p[1-(currentPlayer-1)]-loss);
+      } else {
+        p[currentPlayer-1] += gain;
+      }
+      // zamień kartę na nową z talii
+      let hands = gameData.hands.slice();
+      let deck = gameData.deck.slice();
+      hands[currentPlayer-1][idx] = deck.length ? deck.pop() : null;
+      // log
+      let msg = `Gracz ${currentPlayer} zagrywa ${card["Nazwa"]} (${card["Typ karty"]})`;
+      // zmiana tury
+      let turn = (gameData.turn||0)+1;
+      let next = 1 - (gameData.current||0);
+      db.ref("sesje/" + currentSessionId + "/game").update({
+        hands, deck, points: p, log: (gameData.log||[]).concat([{ msg, t:Date.now() }]), turn, current: next
+      });
+    }
+
+    // --- Wymiana kart (mulligan)
+    function exchangeCard() {
+      if (!isMyTurn) return;
+      let hands = gameData.hands.slice();
+      let deck = gameData.deck.slice();
+      let changed = false;
+      myHand.forEach((card, idx) => {
+        if (document.getElementById("chk"+idx).checked) {
+          if(deck.length) hands[currentPlayer-1][idx] = deck.pop();
+          changed = true;
+        }
+      });
+      if (!changed) return;
+      let msg = `Gracz ${currentPlayer} wymienia zaznaczone karty.`;
+      let turn = (gameData.turn||0)+1;
+      let next = 1 - (gameData.current||0);
+      db.ref("sesje/" + currentSessionId + "/game").update({
+        hands, deck, log: (gameData.log||[]).concat([{ msg, t:Date.now() }]), turn, current: next
+      });
+    }
+
+    // --- Pomocnicze
+    function shuffle(deck) {
+      for (let i = deck.length-1; i>0; i--) {
+        const j = Math.floor(Math.random() * (i+1));
+        [deck[i], deck[j]] = [deck[j], deck[i]];
+      }
+    }
+    function extractPoints(txt) {
+      if (!txt) return 0;
+      const m = txt.match(/[+-]?\d+/);
+      return m ? parseInt(m[0]) : 0;
     }
   </script>
 </body>
