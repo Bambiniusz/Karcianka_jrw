@@ -148,7 +148,6 @@
     let isMyTurn = false;
     let eventDeck = [];
     let eventCard = null;
-    let pendingCardIdx = null;
 
     // Wczytanie kart z karty.csv (automatycznie)
     let csvLoadedData = null;
@@ -308,19 +307,25 @@
       await doPlayCard(idx);
     }
 
+    // --- POPRAWIONA OBSŁUGA MODALA WYBORU GRACZA --- //
     function showTargetModal(idx) {
-      pendingCardIdx = idx;
-      document.getElementById("targetModal").style.display = "flex";
+      const modal = document.getElementById("targetModal");
+      modal.setAttribute("data-cardidx", idx);
+      modal.style.display = "flex";
     }
     function closeTargetModal() {
-      pendingCardIdx = null;
-      document.getElementById("targetModal").style.display = "none";
+      const modal = document.getElementById("targetModal");
+      modal.style.display = "none";
+      modal.removeAttribute("data-cardidx");
     }
     async function resolveTargetPlayer(tg) {
+      const modal = document.getElementById("targetModal");
+      const idx = parseInt(modal.getAttribute("data-cardidx"), 10);
       closeTargetModal();
-      await doPlayUtrudnienie(pendingCardIdx, tg);
-      pendingCardIdx = null;
+      await doPlayUtrudnienie(idx, tg);
     }
+    window.resolveTargetPlayer = resolveTargetPlayer;
+    window.closeTargetModal = closeTargetModal;
 
     async function doPlayUtrudnienie(idx, targetPlayer) {
       const card = myHand[idx];
@@ -422,15 +427,11 @@
       }
     }
    function extractPoints(txt) {
-  if (!txt) return 0;
-  if (txt.toUpperCase().includes("K6")) return "K6";
-  const m = txt.match(/[+-]?\d+/);
-  return m ? parseInt(m[0]) : 0;
-}
-
-// --- POPRAWKA DO MODALI: --- //
-window.resolveTargetPlayer = resolveTargetPlayer;
-window.closeTargetModal = closeTargetModal;
+     if (!txt) return 0;
+     if (txt.toUpperCase().includes("K6")) return "K6";
+     const m = txt.match(/[+-]?\d+/);
+     return m ? parseInt(m[0]) : 0;
+   }
   </script>
 </body>
 </html>
