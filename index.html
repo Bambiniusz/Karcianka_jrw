@@ -421,12 +421,16 @@
         [deck[i], deck[j]] = [deck[j], deck[i]];
       }
     }
-    function extractPoints(txt) {
-      if (!txt) return 0;
-      if (txt.toUpperCase().includes("K6")) return "K6";
-      const m = txt.match(/[+-]?\d+/);
-      return m ? parseInt(m[0]) : 0;
-    }
+   function extractPoints(txt) {
+  if (!txt) return 0;
+  if (txt.toUpperCase().includes("K6")) return "K6";
+  const m = txt.match(/[+-]?\d+/);
+  return m ? parseInt(m[0]) : 0;
+}
+
+// --- POPRAWKA DO MODALI: --- //
+window.resolveTargetPlayer = resolveTargetPlayer;
+window.closeTargetModal = closeTargetModal;
   </script>
 </body>
 </html>
